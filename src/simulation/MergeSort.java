@@ -3,86 +3,123 @@ package simulation;
 public class MergeSort {
 
     /**
-     * Performs merge sort on an integer array.
-     * Merge Sort is a "divide → sort → merge" algorithm.
+     * Melakukan merge sort tetapi hasil akhirnya adalah urutan menurun (descending).
+     * Merge Sort bekerja dengan pola:
+     *  1. Divide  → membagi array menjadi dua bagian
+     *  2. Sort    → mengurutkan kedua bagian (rekursif)
+     *  3. Merge   → menggabungkan dua array terurut menjadi satu array besar
      *
-     * @param arr The unsorted array
-     * @return    A new sorted array (descending or ascending? → ascending)
+     * @param arr Array yang belum terurut
+     * @return    Array baru yang sudah terurut dari terbesar → terkecil
      */
-    public static int[] sort(int[] arr) {
+    public static int[] sortDescending(int[] arr) {
 
         // Base case:
-        // If the array contains 0 or 1 element, it is already sorted.
+        // Jika panjang array 0 atau 1, maka sudah pasti terurut.
         if (arr.length <= 1) return arr;
 
-        // Find the middle index of the array.
+        // Menentukan titik tengah array untuk dipisah dua bagian.
         int mid = arr.length / 2;
 
-        // Split array into two halves: left and right.
+        // Menyiapkan array sisi kiri dan sisi kanan.
         int[] left = new int[mid];
         int[] right = new int[arr.length - mid];
 
         /**
-         * Copy elements into the left and right subarrays.
-         *
-         * left  ← arr[0 ... mid-1]
-         * right ← arr[mid ... end]
+         * Menyalin elemen ke:
+         *  - left  → dari index 0 ... mid-1
+         *  - right → dari index mid ... akhir
          */
         System.arraycopy(arr, 0, left, 0, mid);
         System.arraycopy(arr, mid, right, 0, arr.length - mid);
 
-        // Recursively sort each half.
-        left = sort(left);
-        right = sort(right);
+        // Rekursif -> mengurutkan dua bagian secara terpisah.
+        left = sortDescending(left);
+        right = sortDescending(right);
 
-        // Merge two sorted halves into one sorted array.
-        return merge(left, right);
+        // Setelah kedua bagian terurut, kita gabungkan sambil menjaga descending order.
+        return mergeDesc(left, right);
     }
 
-
     /**
-     * Merges two sorted arrays (left and right) into a single sorted array.
+     * Menggabungkan dua array yang SUDAH terurut descending menjadi satu array descending.
      *
-     * @param left  Sorted left half
-     * @param right Sorted right half
-     * @return      Fully merged and sorted array
+     * @param left  Array kiri (sudah urut descending)
+     * @param right Array kanan (sudah urut descending)
+     * @return      Array hasil gabungan (descending)
      */
-    private static int[] merge(int[] left, int[] right) {
+    private static int[] mergeDesc(int[] left, int[] right) {
 
-        // The merged array will contain all elements from both inputs.
+        // Array final dengan ukuran total gabungan.
         int[] merged = new int[left.length + right.length];
 
-        // Three pointer indexes:
-        int i = 0; // pointer for left array
-        int j = 0; // pointer for right array
-        int k = 0; // pointer for merged array
+        // i → pointer untuk left
+        // j → pointer untuk right
+        // k → pointer untuk merged
+        int i = 0, j = 0, k = 0;
 
         /**
-         * Compare elements from left and right arrays,
-         * pick the smaller one, and insert into merged[].
+         * Selama kedua pointer masih dalam batas array:
+         *   - Ambil nilai paling besar (descending)
+         *   - Masukkan ke merged[]
          */
         while (i < left.length && j < right.length) {
 
-            // If left's value ≤ right's value, pick from left.
-            if (left[i] <= right[j]) {
+            // Dibalik dari ascending: left[i] >= right[j] agar besar duluan
+            if (left[i] >= right[j]) {
                 merged[k++] = left[i++];
             } else {
-                // Else pick from right.
                 merged[k++] = right[j++];
             }
         }
 
-        /**
-         * Copy any remaining elements.
-         *
-         * Only one of these loops will run:
-         * - if left still has leftover elements
-         * - OR if right still has leftover elements
-         */
+        // Jika left masih punya sisa elemen → masukkan semuanya
         while (i < left.length) merged[k++] = left[i++];
+
+        // Jika right masih punya sisa elemen → masukkan semuanya
         while (j < right.length) merged[k++] = right[j++];
 
-        // Return the fully merged, sorted array.
+        // Kembalikan array hasil merge
+        return merged;
+    }
+
+    /**
+     * Versi ASCENDING merge (default merge sort).
+     * Tidak digunakan dalam sistemmu, tapi tetap ada sebagai referensi.
+     *
+     * @param left  Array kiri terurut ascending
+     * @param right Array kanan terurut ascending
+     * @return      Array hasil merge ascending
+     */
+    private static int[] merge(int[] left, int[] right) {
+
+        // Array final untuk hasil merge
+        int[] merged = new int[left.length + right.length];
+
+        int i = 0; // pointer left
+        int j = 0; // pointer right
+        int k = 0; // pointer merged
+
+        /**
+         * Bandingkan elemen kiri dan kanan.
+         * Pilih nilai terkecil terlebih dahulu (ascending).
+         */
+        while (i < left.length && j < right.length) {
+
+            if (left[i] <= right[j]) {
+                merged[k++] = left[i++];
+            } else {
+                merged[k++] = right[j++];
+            }
+        }
+
+        // Masukkan sisa elemen yang masih ada di sisi kiri
+        while (i < left.length) merged[k++] = left[i++];
+
+        // Masukkan sisa elemen yang masih ada di sisi kanan
+        while (j < right.length) merged[k++] = right[j++];
+
+        // Kembalikan hasil merge ascending
         return merged;
     }
 }
